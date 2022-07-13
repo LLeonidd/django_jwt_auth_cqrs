@@ -1,0 +1,110 @@
+version: "3.1"
+
+
+services:
+
+  # CQRS transport backend
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - 15672:15672
+      - 5672:5672
+
+
+  db_pgsql_master_auth:
+    container_name: pgsql_master_auth
+    image: postgres:12
+    environment:
+      POSTGRES_USER: master_service
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: master_auth
+    volumes:
+      - pgsql_data:/var/lib/postgresql/data
+
+
+  db_pgsql_replica_service:
+    container_name: pgsql_replica_service
+    image: postgres:12
+    environment:
+      POSTGRES_USER: replica_service
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: replica_auth
+    volumes:
+      - pgsql_data_replica:/var/lib/postgresql/data
+
+
+  # master auth web app
+  master_auth:
+      container_name: master_auth
+      build:
+        context: master_auth
+      ports:
+        - 8000:8000
+      depends_on:
+        - db_pgsql_master_auth
+        - rabbitmq
+      volumes:
+        - ./master_auth:/app
+      command: >
+        dockerize -wait tcp://rabbitmq:5672 -timeout 30s
+        dockerize -wait tcp://db_pgsql_master_auth:5432 -timeout 30s
+        ./manage.py runserver 0.0.0.0:8000
+
+  # replica WEB app
+  replica_service:
+    container_name: replica_service
+    build:
+      context: replica_service
+    ports:
+      - 8001:8000
+    depends_on:
+      - db_pgsql_replica_service
+      - rabbitmq
+    volumes:
+      - ./replica_service:/app
+    command: >
+      dockerize -wait tcp://rabbitmq:5672 -timeout 30s
+      dockerize -wait tcp://db_pgsql_replica_service:5432 -timeout 30s
+      ./manage.py runserver 0.0.0.0:8000
+
+
+  # replica CQRS consumer worker
+  replica_service_cqrs_consumer:
+    build:
+      context: replica_service
+    depends_on:
+      - db_pgsql_replica_service
+      - rabbitmq
+    volumes:
+      - ./replica_service:/app
+    command: >
+      dockerize -wait tcp://rabbitmq:5672 -timeout 30s
+      dockerize -wait tcp://db_pgsql_replica_service:5432 -timeout 30s
+      ./manage.py cqrs_consume -w2
+
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - pgadmin_microservices:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    restart: always
+
+
+volumes:
+  pgsql_data:
+    driver: local
+  pgsql_data_replica:
+    driver: local
+  pgadmin_microservices:
+    driver: local

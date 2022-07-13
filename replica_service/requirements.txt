@@ -1,0 +1,7 @@
+django
+psycopg2
+cryptography
+djangorestframework
+django-cqrs
+djangorestframework-simplejwt
+pyjwt
