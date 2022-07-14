@@ -4,4 +4,5 @@ cryptography
 djangorestframework
 django-cqrs
 djangorestframework-simplejwt
+drf_yasg
 pyjwt

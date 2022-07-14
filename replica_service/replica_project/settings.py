@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'dj_cqrs',
     'rest_framework',
+    'drf_yasg',
 
     'authentication',
 ]

@@ -1,4 +1,4 @@
-docker-compose up -d db_pgsql_master_auth db_pgsql_replica_service
+docker-compose up -d --no-cache db_pgsql_master_auth db_pgsql_replica_service
 docker-compose run master_auth ./manage.py makemigrations
 docker-compose run master_auth ./manage.py migrate
 docker-compose run replica_service ./manage.py makemigrations

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework',
     'dj_cqrs',
+    'drf_yasg',
 
     'authentication',
     'tokenizator',

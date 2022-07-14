@@ -9,14 +9,23 @@ from .serializers import CustomTokenRefreshSerializer, CustomTokenObtainPairSeri
 
 
 class CustomTokenRefreshView(TokenRefreshView):
+    """
+    Запрос токенов обновления
+    """
     serializer_class = CustomTokenRefreshSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    """
+    Запрос токенов доступа и обновления
+    """
     serializer_class = CustomTokenObtainPairSerializer
 
 
 class LogoutView(APIView):
+    """
+    Занесение токена обновления в черный список
+    """
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
@@ -31,6 +40,10 @@ class LogoutView(APIView):
 
 
 class LogoutAllView(APIView):
+    """
+    Занесение всех токенов выданных пользователю в черный список
+    """
+
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):

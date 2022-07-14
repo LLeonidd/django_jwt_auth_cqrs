@@ -28,6 +28,6 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
 
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(Group)
+admin.site.unregister(Group)
 admin.site.register(UserGroup)
 
