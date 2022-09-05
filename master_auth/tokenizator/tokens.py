@@ -19,5 +19,7 @@ class CustomToken(RefreshToken):
         token['user_group'] = dict(user.groups.values_list())
         """
         token = super().for_user(user)
+        token['first_name'] = user.first_name
+        token['last_name'] = user.last_name
         return token
 

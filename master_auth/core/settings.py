@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework',
+    'corsheaders',
     'dj_cqrs',
     'drf_yasg',
 
@@ -50,12 +51,19 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'core.urls'
 
@@ -145,10 +153,9 @@ CQRS = {
     'password': 'password',
 }
 
-
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        #'authentication.authenticate.CustomAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
     ],
@@ -164,9 +171,19 @@ PUBLIC_KEY = Path(KEYS_FOLDER, 'jwtRS256.key.pub')
 SIMPLE_JWT = {
     'ALGORITHM': 'RS256',
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=40),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'SIGNING_KEY': PRIVATE_KEY.read_text(),
     'VERIFYING_KEY': PUBLIC_KEY.read_text(),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+
+    # additional custom settings
+    'AUTH_COOKIE_KEY': 'refresh_token',  # Cookie name. Enables cookies if value is set.
+    'AUTH_COOKIE_DOMAIN': None,     # A string like "example.com", or None for standard domain cookie.
+    'AUTH_COOKIE_SECURE': False,    # Whether the auth cookies should be secure (https:// only).
+    'AUTH_COOKIE_HTTP_ONLY': True, # Http only cookie flag.It's not fetch by javascript.
+    'AUTH_COOKIE_PATH': '/',        # The path of the auth cookie.
+    'AUTH_COOKIE_SAMESITE': 'Lax',  # Whether to set the flag restricting cookie leaks on cross-site requests. This can be 'Lax', 'Strict', or None to disable the flag.
+    'AUTH_COOKIE_MAX_AGE': 3600 * 24 * 14,  # 14 days
 }
