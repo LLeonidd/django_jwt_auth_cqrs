@@ -6,7 +6,7 @@ from .serializers import UserSerializer
 
 
 class UserView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
 
     def get_queryset(self):
